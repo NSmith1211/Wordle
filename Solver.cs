@@ -20,11 +20,11 @@ namespace Wordle_Solver
             int turns = 5;
             FillAvailableLetters();
 
-        AfterLoop:
+        
             Console.WriteLine("Please enter the target word:");
             string targetWord = Console.ReadLine().ToUpper();
             Console.Clear();
-            ListOfGuesses.Clear();
+            
             this.TargetWord = targetWord;
 
             for (int i = 0; i < TargetWord.Length; i++)
@@ -37,8 +37,28 @@ namespace Wordle_Solver
                 NewGuess();
                 turns--;
             }
+            
+            ListOfGuesses.Clear();
+            Console.WriteLine("Would you like to play again? (Y/N)");
+            string userInput = Console.ReadLine().ToUpper();
+            if(userInput == "Y")
+            {
+                Console.WriteLine("Please enter the target word:");
+                targetWord = Console.ReadLine().ToUpper();
+                Console.Clear();
 
-            goto AfterLoop;
+                this.TargetWord = targetWord;
+                while (NewGuess().ToUpper() != TargetWord && turns > 0)
+                {
+                    NewGuess();
+                    turns--;
+                }
+            }
+            else
+            {
+                Environment.Exit(1);
+            }
+            
                                 
         }
 
@@ -79,12 +99,13 @@ namespace Wordle_Solver
         private string NewGuess()
         {
             
-            Console.Write("Please enter your first guess: ");
+            Console.Write("Please enter your guess: ");
             string guess = Console.ReadLine().ToUpper();
 
             if (guess.ToUpper() == this.TargetWord)
             {
                 Console.WriteLine($"CORRECT! Your guess: {guess.ToUpper()}");
+                ListOfGuesses.Clear();
                 SolveWordle();
                 return guess.ToUpper();
             }
@@ -103,8 +124,7 @@ namespace Wordle_Solver
                 TargetWordArray[i] = TargetWord[i].ToString().ToUpper(); 
             }
 
-            //Dictionary<string,int> repeatingLetters = CountRepeats();
-            //UpdatePossibleLetters(repeatingLetters);
+            
 
             for(int i = 0; i < CurrentGuess.Length; i++)
             {
@@ -159,7 +179,7 @@ namespace Wordle_Solver
                         Console.ForegroundColor = ConsoleColor.Gray;
                         continue;
                     }
-                    else if(AvailableLetters[previousGuess[i].ToString().ToUpper()].IsCorrectLetter && !AvailableLetters[previousGuess[i].ToString().ToUpper()].IsInCorrectPlace)
+                    if(AvailableLetters[previousGuess[i].ToString().ToUpper()].IsCorrectLetter && AvailableLetters[CurrentGuess[i].ToUpper()].ActualLetter != TargetWordArray[i])
                     {
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.Write(previousGuess[i]);
@@ -188,7 +208,7 @@ namespace Wordle_Solver
                         Console.ForegroundColor = ConsoleColor.Gray;
                         continue;
                     }
-                    else if (AvailableLetters[CurrentGuess[i].ToUpper()].IsCorrectLetter && !AvailableLetters[CurrentGuess[i].ToUpper()].IsInCorrectPlace)
+                    if (AvailableLetters[CurrentGuess[i].ToUpper()].IsCorrectLetter && AvailableLetters[CurrentGuess[i].ToUpper()].ActualLetter != TargetWordArray[i])
                     {
                         Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.Write(CurrentGuess[i]);
