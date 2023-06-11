@@ -11,9 +11,10 @@ namespace Wordle_Solver
     {
         public static void Main(string[] args)
         {
-            string todaysTargetWord = Console.ReadLine();
-            Solver s = new Solver(todaysTargetWord);
-            s.SolveWordle(todaysTargetWord);
+            
+            Solver s = new Solver();
+            
+            s.SolveWordle();
 
             
         }

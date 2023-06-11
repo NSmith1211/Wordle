@@ -9,30 +9,37 @@ namespace Wordle_Solver
     public class Solver
     {
         public string TargetWord { get; set; }
-        public string[] TargetWordArray;
-        public string[] CurrentGuess;
-
+        public string[] TargetWordArray = new string[5];
+        public string[] CurrentGuess = new string[5];
         public Dictionary<string, Letter> AvailableLetters = new Dictionary<string, Letter>();
-        public string[] ResultArray;
+        public string[] ResultArray = new string[5];
+        public List<string> ListOfGuesses = new List<string>();
 
-        public void SolveWordle(string targetWord)
+        public void SolveWordle()
         {
-            this.TargetWord = targetWord;
+            int turns = 5;
             FillAvailableLetters();
-            
-            string result = "";
 
-            for(int i = 0; i < TargetWord.Length; i++)
+        AfterLoop:
+            Console.WriteLine("Please enter the target word:");
+            string targetWord = Console.ReadLine().ToUpper();
+            Console.Clear();
+            ListOfGuesses.Clear();
+            this.TargetWord = targetWord;
+
+            for (int i = 0; i < TargetWord.Length; i++)
             {
                 TargetWordArray[i] = TargetWord[i].ToString().ToUpper();
             }
 
-            while (NewGuess() != targetWord)
+            while (NewGuess().ToUpper() != TargetWord && turns > 0 )
             {
                 NewGuess();
+                turns--;
             }
-            
-                      
+
+            goto AfterLoop;
+                                
         }
 
 
@@ -64,135 +71,171 @@ namespace Wordle_Solver
             AvailableLetters["X"] = new Letter("X");
             AvailableLetters["Y"] = new Letter("Y");
             AvailableLetters["Z"] = new Letter("Z");
-            
-        }
 
-        public void CountCorrectLetters()
-        {
-            int counter = 0;
-            foreach(KeyValuePair<string,Letter> kvp in AvailableLetters)
-            {
-                if (kvp.Value.IsCorrectLetter)
-                {
-                    counter++;
-                    Console.WriteLine($"The letter {kvp.Key} is in the target word. However, it is not in the correct place.");
-                }
-            }
-
-            Console.WriteLine($"You have a total of {counter} correct letters.");
-            
-        }
-
-        public void CountCorrectPlace()
-        {
-            int counter = 0;
-
-            foreach (KeyValuePair<string, Letter> kvp in AvailableLetters)
-            {
-                if (kvp.Value.IsInCorrectPlace)
-                {
-                    counter++;
-                    Console.WriteLine($"The letter {kvp.Key} is in the target word and in the correct place.");
-                }
-            }
-
-            Console.WriteLine($"You have a total of {counter} correct letters in the correct place.");
         }
 
 
-        public string NewGuess()
+
+        private string NewGuess()
         {
             
-            string displayWord = "";
+            Console.Write("Please enter your first guess: ");
             string guess = Console.ReadLine().ToUpper();
 
-
-            if(guess == this.TargetWord)
+            if (guess.ToUpper() == this.TargetWord)
             {
-                Console.WriteLine("CORRECT! You guessed the right word");
-                return guess;
+                Console.WriteLine($"CORRECT! Your guess: {guess.ToUpper()}");
+                SolveWordle();
+                return guess.ToUpper();
             }
+            
 
             for (int i = 0; i < guess.Length; i++)
             {
                 CurrentGuess[i] = guess[i].ToString().ToUpper();
             }
+            
 
+            ListOfGuesses.Add(guess);
 
-            foreach (string letter in CurrentGuess)
+            for(int i = 0; i < TargetWord.Length; i++)
             {
-                if (TargetWord.Contains(letter))
-                {
-                    AvailableLetters[letter].IsCorrectLetter = true;
-                    ResultArray[TargetWord.IndexOf(letter)] = letter;
-                }
-                if (TargetWord.IndexOf(letter) == guess.IndexOf(letter))
-                {
-                    AvailableLetters[letter].IsInCorrectPlace = true;
-                    ResultArray[TargetWord.IndexOf(letter)] = letter;
-                }
+                TargetWordArray[i] = TargetWord[i].ToString().ToUpper(); 
             }
-           
 
-            for(int i = 0; i <ResultArray.Length; i++)
+            //Dictionary<string,int> repeatingLetters = CountRepeats();
+            //UpdatePossibleLetters(repeatingLetters);
+
+            for(int i = 0; i < CurrentGuess.Length; i++)
             {
-                if(ResultArray[i] == null)
-                {
-                    ResultArray[i] = "_";
-                }
+                
+                
+                    if (TargetWordArray.Contains(CurrentGuess[i]))
+                    {
+                        AvailableLetters[CurrentGuess[i]].IsCorrectLetter = true;
+
+
+                    }
+                    if (CurrentGuess[i] == TargetWordArray[i])
+                    {
+                        AvailableLetters[CurrentGuess[i]].IsInCorrectPlace = true;
+                        AvailableLetters[CurrentGuess[i]].IndexInResult = i;
+                        ResultArray[i] = CurrentGuess[i];
+                    }
+                    if (!TargetWordArray.Contains(CurrentGuess[i]))
+                    {
+                        AvailableLetters[CurrentGuess[i]].isPossibleLetter = false;
+                    }
+                
+                
+                
             }
+
+
 
 
             Console.WriteLine($"Turn Completed.");
-            CountCorrectLetters();
-            CountCorrectPlace();
+            
             Console.WriteLine($"\n");
             
             DisplayProgress();
 
-            return guess;
+            return guess.ToUpper();
         }
 
-        public void DisplayProgress()
+        private void DisplayProgress()
         {
-            
-            foreach(string letter in ResultArray)
+            Console.Clear();
+            Console.WriteLine("Previous Guesses:");
+            foreach(string previousGuess in ListOfGuesses)
             {
-                if(letter != "_")
+                
+                for(int i = 0;i < previousGuess.Length; i++)
                 {
-                    if (AvailableLetters[letter].IsInCorrectPlace)
+                    if(AvailableLetters[previousGuess[i].ToString().ToUpper()].ActualLetter == TargetWordArray[i])
                     {
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write(letter);
+                        Console.Write(previousGuess[i]);
                         Console.ForegroundColor = ConsoleColor.Gray;
+                        continue;
                     }
-                    else if (AvailableLetters[letter].IsCorrectLetter)
+                    else if(AvailableLetters[previousGuess[i].ToString().ToUpper()].IsCorrectLetter && !AvailableLetters[previousGuess[i].ToString().ToUpper()].IsInCorrectPlace)
                     {
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.Write(letter);
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.Write(previousGuess[i]);
                         Console.ForegroundColor = ConsoleColor.Gray;
+                        continue;
+
                     }
                     else
                     {
-                        Console.Write($"{letter}");
+                        Console.Write($"{previousGuess[i]}");
                     }
+                }
+                Console.WriteLine();
+            }
+
+            Console.WriteLine("\n");
+            Console.Write("Latest Guess: ");
+            for(int i = 0; i < CurrentGuess.Length; i++)
+            {
+                if(CurrentGuess[i] != "_")
+                {
+                    if (AvailableLetters[CurrentGuess[i].ToUpper()].ActualLetter == TargetWordArray[i])
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write(CurrentGuess[i]);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        continue;
+                    }
+                    else if (AvailableLetters[CurrentGuess[i].ToUpper()].IsCorrectLetter && !AvailableLetters[CurrentGuess[i].ToUpper()].IsInCorrectPlace)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
+                        Console.Write(CurrentGuess[i]);
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        continue;
+                    }
+                    else
+                    {
+                        Console.Write($"{CurrentGuess[i]}");
+                    }
+                                        
+                }
+                
+                
+            }
+            Console.WriteLine("\nLetters:\n");
+            foreach(KeyValuePair<string,Letter> kvp in AvailableLetters)
+            {
+                if (kvp.Value.IsInCorrectPlace)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write($"{kvp.Key} ");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    continue;
+                }
+                if (kvp.Value.IsCorrectLetter)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                    Console.Write($"{kvp.Key} ");
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    continue;
+                }
+                if (kvp.Value.isPossibleLetter)
+                {
+                    Console.Write($"{kvp.Key} ");
+                    continue;
                 }
                 else
                 {
-                    Console.Write($"{letter}");
+                    Console.ForegroundColor = ConsoleColor.Black;
+                    Console.Write($"{kvp.Key} ");
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
-                
             }
-            Console.WriteLine("\n");
+            Console.WriteLine();
         }
 
-
-        public Solver(string word)
-        {
-            TargetWord = word;
-            this.TargetWordArray = new string[word.Length];
-            this.CurrentGuess = new string[word.Length];
-            this.ResultArray = new string[word.Length];
-        }
+      
     }
 }
