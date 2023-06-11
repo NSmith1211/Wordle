@@ -12,10 +12,25 @@ namespace Wordle_Solver
         public static void Main(string[] args)
         {
             
-            Solver s = new Solver();
-            
+            Solver s = new Solver();            
             s.SolveWordle();
 
+            while (true)
+            {
+                Console.WriteLine("Would you like to play again? (Y/N)");
+                string userInput = Console.ReadLine().ToUpper();
+
+                if (userInput == "Y")
+                {
+                    Solver newGame = new Solver();
+                    newGame.SolveWordle();
+                }
+                else
+                {
+                    Environment.Exit(0);
+                }
+            }
+            
             
         }
 

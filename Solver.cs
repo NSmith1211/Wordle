@@ -14,10 +14,11 @@ namespace Wordle_Solver
         public Dictionary<string, Letter> AvailableLetters = new Dictionary<string, Letter>();
         public string[] ResultArray = new string[5];
         public List<string> ListOfGuesses = new List<string>();
+        public int Turns { get; set; } = 5;
 
         public void SolveWordle()
         {
-            int turns = 5;
+            Console.Title = "Wordle";
             FillAvailableLetters();
 
         
@@ -32,34 +33,17 @@ namespace Wordle_Solver
                 TargetWordArray[i] = TargetWord[i].ToString().ToUpper();
             }
 
-            while (NewGuess().ToUpper() != TargetWord && turns > 0 )
+            while (NewGuess().ToUpper() != TargetWord && this.Turns > 0)
             {
                 NewGuess();
-                turns--;
+                
             }
-            
-            ListOfGuesses.Clear();
-            Console.WriteLine("Would you like to play again? (Y/N)");
-            string userInput = Console.ReadLine().ToUpper();
-            if(userInput == "Y")
-            {
-                Console.WriteLine("Please enter the target word:");
-                targetWord = Console.ReadLine().ToUpper();
-                Console.Clear();
 
-                this.TargetWord = targetWord;
-                while (NewGuess().ToUpper() != TargetWord && turns > 0)
-                {
-                    NewGuess();
-                    turns--;
-                }
-            }
-            else
+            if (this.Turns == 0 && !CurrentGuess.Equals(TargetWordArray))
             {
-                Environment.Exit(1);
+                Console.WriteLine("Sorry, you ran out of guesses.");
             }
-            
-                                
+                                                                   
         }
 
 
@@ -104,9 +88,7 @@ namespace Wordle_Solver
 
             if (guess.ToUpper() == this.TargetWord)
             {
-                Console.WriteLine($"CORRECT! Your guess: {guess.ToUpper()}");
-                ListOfGuesses.Clear();
-                SolveWordle();
+                Console.WriteLine($"CORRECT! Your guess: {guess.ToUpper()}");               
                 return guess.ToUpper();
             }
             
@@ -155,6 +137,7 @@ namespace Wordle_Solver
 
 
             Console.WriteLine($"Turn Completed.");
+            this.Turns -= 1;
             
             Console.WriteLine($"\n");
             
@@ -196,6 +179,7 @@ namespace Wordle_Solver
             }
 
             Console.WriteLine("\n");
+            Console.WriteLine($"Turn Remaining: {Turns}");
             Console.Write("Latest Guess: ");
             for(int i = 0; i < CurrentGuess.Length; i++)
             {
@@ -253,7 +237,7 @@ namespace Wordle_Solver
                     Console.ForegroundColor = ConsoleColor.Gray;
                 }
             }
-            Console.WriteLine();
+            Console.WriteLine("\n");
         }
 
       
