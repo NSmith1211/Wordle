@@ -5,15 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Wordle_Solver
+namespace Wordle
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             
-            Solver s = new Solver();            
-            s.SolveWordle();
+            Game s = new Game();            
+            s.PlayWordle();
 
             while (true)
             {
@@ -22,8 +22,8 @@ namespace Wordle_Solver
 
                 if (userInput == "Y")
                 {
-                    Solver newGame = new Solver();
-                    newGame.SolveWordle();
+                    Game newGame = new Game();
+                    newGame.PlayWordle();
                 }
                 else
                 {
