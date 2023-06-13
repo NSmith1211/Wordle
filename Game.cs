@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,8 +25,8 @@ namespace Wordle
             FillAvailableLetters();
        
             Console.WriteLine("Please enter the target word:");
-            //string targetWord = WordsAvailable.GetRandomWord().ToUpper();
-            string targetWord = "FEELS";
+            string targetWord = WordsAvailable.GetRandomWord().ToUpper();
+            //string targetWord = "FEELS";
             Console.Clear();
             
             this.TargetWord = targetWord;
@@ -36,6 +37,7 @@ namespace Wordle
             }
 
             CountTargetLetterAppearnces();
+            AddIndexes();
 
             while (!IsGameOver())
             {
@@ -107,7 +109,9 @@ namespace Wordle
                 if (CurrentGuess[i] == TargetWordArray[i])
                 {
                     AvailableLetters[CurrentGuess[i]].IsInCorrectPlace = true;
-                    AvailableLetters[CurrentGuess[i]].IndexInResult = i;
+
+                    
+                    
                     ResultArray[i] = CurrentGuess[i];
                     
                 }
@@ -134,77 +138,40 @@ namespace Wordle
             Console.Clear();
             Console.WriteLine("Previous Guesses:");
 
-            foreach(string previousGuess in ListOfGuesses)
+            foreach (string previousGuess in ListOfGuesses)
             {
-                AvailableLetters[previousGuess[0].ToString().ToUpper()].AmountInGuessWord = 0;
-                AvailableLetters[previousGuess[1].ToString().ToUpper()].AmountInGuessWord = 0;
-                AvailableLetters[previousGuess[2].ToString().ToUpper()].AmountInGuessWord = 0;
-                AvailableLetters[previousGuess[3].ToString().ToUpper()].AmountInGuessWord = 0;
-                AvailableLetters[previousGuess[4].ToString().ToUpper()].AmountInGuessWord = 0;
-
-
-                for(int i = 0;i < previousGuess.Length; i++)
+                string[] newArray = new string[previousGuess.Length];
+                for (int i = 0;i < newArray.Length; i++)
                 {
-                    Letter letter = AvailableLetters[previousGuess[i].ToString().ToUpper()];
-                    
+                    newArray[i] = previousGuess[i].ToString().ToUpper();
+                }
 
-                    if (previousGuess[i].ToString().ToUpper() == TargetWordArray[i] && letter.AmountInGuessWord < letter.AmountInTargetWord)
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write(previousGuess[i]);
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        letter.AmountInGuessWord += 1;
-                        continue;
-                    }
-                    if (TargetWord.Contains(previousGuess[i].ToString().ToUpper()) && TargetWordArray[i] != previousGuess[i].ToString().ToUpper() && letter.AmountInGuessWord < letter.AmountInTargetWord)
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.Write(previousGuess[i]);
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        letter.AmountInGuessWord += 1;
-                        continue;
-                    }
-                    else
-                    {
-                        Console.Write($"{previousGuess[i]}");
-                    }
+                ConsoleColor[] colors = DetermineLetterColor(newArray, TargetWordArray);
 
-                    letter.AmountInGuessWord += 1;
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    Console.ForegroundColor = colors[i];
+                    Console.Write(previousGuess[i]);
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
 
                 Console.WriteLine();
             }
 
+
             Console.WriteLine("\n");
             Console.WriteLine($"Turn Remaining: {Turns}");
             Console.Write("Latest Guess: ");
 
-            for(int i = 0; i < CurrentGuess.Length; i++)
+            ConsoleColor[] currentGuessColors = DetermineLetterColor(CurrentGuess,TargetWordArray);
+
+            for (int i = 0; i < currentGuessColors.Length; i++)
             {
-                if(CurrentGuess[i] != "_")
-                {
-                    if (AvailableLetters[CurrentGuess[i].ToUpper()].ActualLetter == TargetWordArray[i])
-                    {
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.Write(CurrentGuess[i]);
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        continue;
-                    }
-                    if (AvailableLetters[CurrentGuess[i].ToUpper()].IsContainedLetter && AvailableLetters[CurrentGuess[i].ToUpper()].ActualLetter != TargetWordArray[i])
-                    {
-                        Console.ForegroundColor = ConsoleColor.DarkYellow;
-                        Console.Write(CurrentGuess[i]);
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        continue;
-                    }
-                    else
-                    {
-                        Console.Write($"{CurrentGuess[i]}");
-                    }
-                                        
-                }
-                
+                Console.ForegroundColor = currentGuessColors[i];
+                Console.Write(CurrentGuess[i]);
+                Console.ForegroundColor = ConsoleColor.Gray;
             }
+
             Console.WriteLine("\nLetters:\n");
             foreach(KeyValuePair<string,Letter> kvp in AvailableLetters)
             {
@@ -266,9 +233,73 @@ namespace Wordle
         }
 
         
+        private ConsoleColor[] DetermineLetterColor(string[] guess, string[] target)
+        {
+            ConsoleColor[] colors = new ConsoleColor[guess.Length];
+            List<string> list = new List<string>();
 
+            //Get unique letters
+            for(int i  = 0; i < guess.Length; i++)
+            {
+                if (!list.Contains(guess[i]))
+                {
+                    list.Add(guess[i]);
+                }
+            }
+
+            for (int i  = 0; i < guess.Length; i++)
+            {
+                AvailableLetters[guess[i]].AmountUsedInGuessWord += 1;
+            }
+
+            for (int i = 0; i < guess.Length; i++)
+            {
+                //Loop through unique values
+                foreach(string letter in list)
+                {
+                   
+                    for (int j = 0; j < AvailableLetters[letter].IndexesOfLetter.Count; j++)
+                    {
+                        if (guess[AvailableLetters[letter].IndexesOfLetter[j]] == target[AvailableLetters[letter].IndexesOfLetter[j]] && colors[AvailableLetters[letter].IndexesOfLetter[j]] != ConsoleColor.Green)
+                        {
+                            colors[AvailableLetters[letter].IndexesOfLetter[j]] = ConsoleColor.Green;
+                            AvailableLetters[letter].LettersPlaced += 1;
+                            AvailableLetters[letter].CountOfGreensInGuess += 1;
+                            
+                        }
+                    }
+                }
+                
+                if (target.Contains(guess[i]) && colors[i] != ConsoleColor.Green && AvailableLetters[guess[i]].LettersPlaced < AvailableLetters[guess[i]].AmountInTargetWord)
+                {
+                    colors[i] = ConsoleColor.DarkYellow;
+                    AvailableLetters[guess[i]].LettersPlaced += 1;
+                }
+                else if (colors[i] != ConsoleColor.DarkYellow && colors[i] != ConsoleColor.Green)
+                {
+                    colors[i] = ConsoleColor.Gray;
+                    AvailableLetters[guess[i]].LettersPlaced += 1;
+                }
+            }
+            foreach (string item in list)
+            {                
+                    AvailableLetters[item].AmountUsedInGuessWord = 0;
+                    AvailableLetters[item].CountOfGreensInGuess = 0;
+                    AvailableLetters[item].LettersPlaced = 0;
+
+            }
+
+
+            return colors;
+        }
         
-
+        private void AddIndexes()
+        {
+            for(int i = 0; i < TargetWordArray.Length; i++)
+            {
+                AvailableLetters[TargetWordArray[i]].IndexesOfLetter.Add(i);
+            }
+        }
 
     }
 }
