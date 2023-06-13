@@ -25,8 +25,7 @@ namespace Wordle
             FillAvailableLetters();
        
             Console.WriteLine("Please enter the target word:");
-            string targetWord = WordsAvailable.GetRandomWord().ToUpper();
-            //string targetWord = "FEELS";
+            string targetWord = WordsAvailable.GetRandomWord().ToUpper();            
             Console.Clear();
             
             this.TargetWord = targetWord;
@@ -81,12 +80,21 @@ namespace Wordle
         private string NewGuess()
         {
             
+            AfterLoop:
             Console.Write("Please enter your guess: ");
             string guess = Console.ReadLine().ToUpper();
-            CurrentGuessString = guess;
+            if(WordsAvailable.CheckIfValidGuess(guess))
+            {
+                CurrentGuessString = guess;
+            }
+            else
+            {
+                goto AfterLoop;
+            }
+
 
             
-            
+
             for (int i = 0; i < guess.Length; i++)
             {
                 CurrentGuess[i] = guess[i].ToString().ToUpper();

@@ -12,6 +12,9 @@
     <None Update="answers.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="guesses.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="shuffled_real_wordles.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

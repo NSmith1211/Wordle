@@ -49,6 +49,38 @@ namespace Wordle
 
             return selectedWord;
         }
+
+        public static bool CheckIfValidGuess(string guess)
+        {
+            try
+            {
+                string directory = Environment.CurrentDirectory;
+                string fileName = "guesses.txt";
+                string fullPath = Path.Combine(directory, fileName);
+
+                using(StreamReader sr = new StreamReader(fullPath))
+                {
+                    if (sr.ReadToEnd().ToUpper().Contains(guess))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Not a valid guess, please try again");
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                        return false;
+                    }
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Sorry, an error occured retriveing your guess");
+                return false;
+            }
+
+            
+        }
         
 
 
